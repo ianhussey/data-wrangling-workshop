@@ -27,6 +27,8 @@ library(tidyr)
 library(readr)
 library(janitor) # for clean_names()
 library(stringr)
+library(knitr)
+library(kableExtra)
 
 ```
 
@@ -274,36 +276,36 @@ After renaming and selecting columns, we know what columns we have. But what row
 
 ```{r}
 
-data_demographics_trimmed |>
+data_demographics_trimmed %>%
   count(item)
 
-data_demographics_trimmed |>
+data_demographics_trimmed %>%
   count(response)
 
 ```
 
 ```{r}
 
-data_selfreport_trimmed |>
+data_selfreport_trimmed %>%
   count(item)
 
-data_selfreport_trimmed |>
+data_selfreport_trimmed %>%
   count(response)
 
 ```
 
 ```{r}
 
-data_amp_trimmed |>
+data_amp_trimmed %>%
   count(block)
 
-data_amp_trimmed |>
+data_amp_trimmed %>%
   count(trial_type)
 
-data_amp_trimmed |>
+data_amp_trimmed %>%
   count(correct)
 
-data_amp_trimmed |>
+data_amp_trimmed %>%
   count(latency)
 
 ```
@@ -314,7 +316,7 @@ Note that it is also possible to use count to obtain the frequencies of sets of 
 
 ```{r}
 
-data_demographics_trimmed |>
+data_demographics_trimmed %>%
   count(item, response)
 
 ```
@@ -323,8 +325,8 @@ It can be useful to arrange the output by the frequencies.
 
 ```{r}
 
-data_demographics_trimmed |>
-  count(item, response) |>
+data_demographics_trimmed %>%
+  count(item, response) %>%
   arrange(desc(n)) # arrange in descending order
 
 ```
@@ -340,15 +342,15 @@ You can specify the logical test for filtering in many ways, including equivalen
 ```{r}
 
 # example using equivalence
-example_equivalence <- data_amp_trimmed |>
+example_equivalence <- data_amp_trimmed %>%
   filter(block == "test")
 
 # example using negation
-example_negation <- data_selfreport_trimmed |>
+example_negation <- data_selfreport_trimmed %>%
   filter(item != "instructions")
 
 # example using membership
-example_membership <- data_selfreport_trimmed |>
+example_membership <- data_selfreport_trimmed %>%
   filter(item %in% c("positive", "prefer", "like"))
 
 ```
@@ -359,10 +361,10 @@ You can also have multiple criteria in your filter call, both of which have to b
 
 ```{r}
 
-example_multiple_criteria_1 <- data_amp_trimmed |>
+example_multiple_criteria_1 <- data_amp_trimmed %>%
   filter(block != "test" & correct == 1)
 
-example_multiple_criteria_2 <- data_amp_trimmed |>
+example_multiple_criteria_2 <- data_amp_trimmed %>%
   filter(block != "test" | correct == 1)
 
 # note that these provide different results - make sure you understand why
@@ -376,10 +378,10 @@ Filter the self reports data frame to remove the instructions. Filter the AMP da
 
 ```{r}
 
-data_selfreport_trials <- data_selfreport_trimmed |>
+data_selfreport_trials <- data_selfreport_trimmed %>%
   filter(item %in% c("positive", "prefer", "like"))
 
-data_amp_test_trials <- data_amp_trimmed |>
+data_amp_test_trials <- data_amp_trimmed %>%
   filter(block == "test" & trial_type != "instructions")
 
 ```
@@ -399,14 +401,14 @@ Which is for rows and which is for columns?
 ```{r}
 
 # mutating new variables
-example_1 <- data_amp_test_trials |>
+example_1 <- data_amp_test_trials %>%
   mutate(latency_plus_1 = latency + 1)
 
-example_2 <- data_amp_test_trials |>
+example_2 <- data_amp_test_trials %>%
   mutate(log_latency = log(latency))
 
 # mutating the contents of existing variables
-example_3 <- data_amp_test_trials |>
+example_3 <- data_amp_test_trials %>%
   mutate(latency = latency / 1000) # latency is now in seconds rather than milliseconds
 
 ```
@@ -485,7 +487,7 @@ Try doing this with a simple logical test of whether latency < 100. You can do t
 
 ```{r}
 
-data_amp_test_trials_with_fast_trials <- data_amp_test_trials |>
+data_amp_test_trials_with_fast_trials <- data_amp_test_trials %>%
   mutate(fast_trial = latency < 100)
 
 ```
@@ -501,18 +503,19 @@ In simple cases like this, you can use `mutate()` and `ifelse()` to change impos
 ```{r}
 
 # what values are present?
-data_demographics_trimmed |>
-  filter(item == "age") |>
+data_demographics_trimmed %>%
+  filter(item == "age") %>%
   count(response) 
 
 # fix them with mutate
-data_demographics_age_tidy <- data_demographics_trimmed |>
-  filter(item == "age") |>
-  mutate(response = ifelse(response == "old", NA, response)) |>
+data_demographics_age_tidy <- data_demographics_trimmed %>%
+  filter(item == "age") %>%
+  mutate(response = ifelse(response == "old", NA, response),
+         response = as.numeric(response)) %>%
   select(unique_id, age = response) # note that you can rename inside a select call
 
 # check this has fixed the issue
-data_demographics_age_tidy |>
+data_demographics_age_tidy %>%
   count(age)
 
 ```
@@ -530,19 +533,19 @@ Use `ifelse()` and `%in%` inside `mutate()` to change values other than the Like
 ```{r}
 
 # what values are present?
-data_selfreport_trials |>
+data_selfreport_trials %>%
   count(response)
 
 # what type of data is the response column?
 class(data_selfreport_trials$response)
 
 # remove non Likert values
-data_selfreport_tidy <- data_selfreport_trials |>
+data_selfreport_tidy <- data_selfreport_trials %>%
   mutate(response = ifelse(response %in% c("1", "2", "3", "4", "5", "6", "7"), response, NA),
          response = as.numeric(response))
 
 # show the data after changes
-data_selfreport_tidy |>
+data_selfreport_tidy %>%
   count(response)
 
 class(data_selfreport_tidy$response)
@@ -559,44 +562,237 @@ What other ways are there of implementing this mutate, e.g., without using `%in%
 
 ## Practice `mutate()` & learn `case_when()`
 
+`case_when()` allows you to compare multiple logical tests or if-else tests.
+
 The AMP data needs to be reverse scored. Just like an item on a self-report that is worded negatively (e.g., most items: I am a good person; some items: I am a bad person), the negative prime trials have the opposite 'accuracy' values that they should. Use `mutate()` and `case_when()` to reverse score the negative prime trials, so that what was 0 is now 1 and what was 1 is now 0.
 
 ```{r}
 
-data_amp_tidy <- data_amp_test_trials_with_fast_trials |>
+data_amp_tidy <- data_amp_test_trials_with_fast_trials %>%
   mutate(correct = case_when(trial_type == "prime_positive" ~ correct,
                              trial_type == "prime_negative" & correct == 0 ~ 1,
                              trial_type == "prime_negative" & correct == 1 ~ 0))
+
+# you can also specify a default value to return if none of the logical tests are passed with 'TRUE ~':
+data_amp_tidy <- data_amp_test_trials_with_fast_trials %>%
+  mutate(correct = case_when(trial_type == "prime_negative" & correct == 0 ~ 1,
+                             trial_type == "prime_negative" & correct == 1 ~ 0,
+                             TRUE ~ correct))
   
 ```
 
-# Summarize across rows
+# Mini-lesson: `round()` probably doesn't do what you think
 
-## For results summaries
+Did you know that R doesn't use the rounding method most of us are taught in school, where .5 is rounded up to the next integer? Instead it uses "banker's rounding", which is better when you round a very large number of numbers, but worse for reporting the results of specific analyses. 
 
-## calculating sum/mean scores
+This is easier to show than explain. What do you expect the output of the below chunk to be? And what is the actual output?
 
-This is surprisingly easy to screw up!
+```{r}
 
-### doing this in wide format instead - not accidentially imputing
+round(0.5)
+round(1.5)
+round(2.5)
+round(3.5)
+round(4.5)
+round(5.5)
 
-## Summarizing by subsets using `group_by()`
+```
+
+Remember: you probably need to use `janitor::round_half_up()` in most of your R scripts
+
+```{r}
+
+round_half_up(0.5)
+round_half_up(1.5)
+round_half_up(2.5)
+round_half_up(3.5)
+round_half_up(4.5)
+round_half_up(5.5)
+
+```
+
+# Summarizing across rows
+
+It is very common that we need to create summaries across rows. For example, to create the mean and standard deviation of a column like age. This can be done with `summarize()`. Remember: `mutate()` creates new columns or modifies the contents of existing columns, but does not change the number of rows. Whereas `summarize()` reduces a data frame down to one row.
+
+```{r}
+
+# mean
+data_demographics_age_tidy %>%
+  summarize(mean_age = mean(age, na.rm = TRUE))
+
+# SD
+data_demographics_age_tidy %>%
+  summarize(sd_age = sd(age, na.rm = TRUE))
+
+# mean and SD with rounding, illustrating how multiple summarizes can be done in one function call
+data_demographics_age_tidy %>%
+  summarize(mean_age = mean(age, na.rm = TRUE),
+            mean_age = round_half_up(mean_age, digits = 2),
+            sd_age = sd(age, na.rm = TRUE),
+            sd_age = round_half_up(sd_age, digits = 2))
+
+```
+
+## `group_by()`
+
+Often, we don't want to reduce a data frame down to a single row / summarize the whole dataset, but instead we want to create a summary for each (sub)group. For example
+
+```{r}
+
+# # this code creates data needed for this example - you can simply load the data from disk and skip over this commented-out code. we will come back to things like 'joins' later
+# data_demographics_unique_participant_codes <- data_demographics_trimmed %>%
+#   count(unique_id) %>%
+#   filter(n == 2)
+# 
+# data_demographics_age_gender_tidy <- data_demographics_trimmed %>%
+#   semi_join(data_demographics_unique_participant_codes, by = "unique_id") %>%
+#   pivot_wider(names_from = "item",
+#               values_from = "response") %>%
+#   mutate(age = ifelse(age == "old", NA, age),
+#          age = as.numeric(age),
+#          gender = tolower(gender),
+#          gender = stringr::str_remove_all(gender, regex("\\W+")), # regex is both very useful and awful to write
+#          gender = case_when(gender == "female" ~ gender,
+#                             gender == "male" ~ gender,
+#                             gender == "nonbinary" ~ gender,
+#                             gender == "woman" ~ "female",
+#                             gender == "man" ~ "male"))
+# 
+# dir.create("../data/processed")
+# write_csv(data_demographics_age_gender_tidy, "data_demographics_age_gender_tidy.csv")
+
+# load suitable example data from disk
+data_demographics_age_gender_tidy <- read_csv("data_demographics_age_gender_tidy.csv")
+
+
+# illustrate use of group_by() and summarize()
+data_demographics_age_gender_tidy %>%
+  group_by(gender) %>%
+  summarize(mean_age = mean(age, na.rm = TRUE))
+
+```
+
+## `n()`
+
+`n()` calculates the number of rows, i.e., the N. It can be useful in summarize.
+
+```{r}
+
+# summarize n
+data_demographics_age_gender_tidy %>%
+  summarize(n_age = n())
+
+# summarize n per gender group
+data_demographics_age_gender_tidy %>%
+  group_by(gender) %>%
+  summarize(n_age = n())
+
+```
+
+Note that `count()` is just the combination of group_by() and summiarize() and n()! they produce the same results as above.
+
+```{r}
+
+# summarize n
+data_demographics_age_gender_tidy %>%
+  count()
+
+# summarize n per gender group
+data_demographics_age_gender_tidy %>%
+  count(gender)
+
+```
+
+## More complex summarizations
+
+Like mutate, the operation you do to summarize can also be more complex, such as finding the mean result of a logical test to calculate a proportion. For example, the proportion of participants who are less than 25 years old: 
+
+```{r}
+
+data_demographics_age_tidy %>%
+  summarize(proportion_less_than_25 = mean(age < 25, na.rm = TRUE))
+
+```
+
+You can also summarize (or indeed mutate) multiple columns in the same way using `across()`, for do-this-across-columns. We won't cover how to use this here or all the variations that are possible, just know that it can be done. For example:
+
+```{r}
+
+# using the mtcars dataset that is built in to {dplyr}, ... 
+mtcars %>%
+  # ... calculate the mean of every numeric column in the dataset ...
+  summarise(across(where(is.numeric), mean, na.rm = TRUE)) %>%
+  # ... and then round every column to one decimal place
+  mutate(across(everything(), round_half_up, digits = 1))
+
+```
+
+## Practice using `summarize()`
+
+Calculate the min, max, mean, and SD of all responses on the self report data.
+
+Currently each participant has up to three responses on the self-report scales (three item scale: like, positive, and prefer). Create a new dataframe containing each unique_id's mean score across the items. Also calculate how many items each participant has data for, and whether they have complete data (i.e., data for three items).
+
+Using only participants with complete data, calculate the mean and SD of all participant's mean scores on the self-reports.
+
+```{r}
+
+# data_selfreport_tidy
+
+```
+
+Create a new data frame that calculates the proportion of prime-congruent trials for each participant on the AMP (i.e., the mean of the 'correct' column) and their proportion of too-fast trials.
+
+Add to that data frame a new column called "exclude_amp" and set it to "exclude" if more than 10% of a participant's trials are too-fast trials.
+
+Calculate the proportion of participants who are to be excluded.
+
+```{r}
+
+# data_amp_tidy
+
+```
+
+# Check your learning
+
+What is the difference between `mutate()` and `summarize()`? If I use the wrong one, will I get the same answer? E.g., mutate(mean_age = mean(age, na.rm = TRUE)) vs. summarize(mean_age = mean(age, na.rm = TRUE))
 
 # Joining data frames
 
-# Writing to disk
+\TODO add 
 
-# Sanity checks
+# Nicer tables using kable() and kable_classic()
 
+Nicer tables can be printed using many different packages. I tend to use the combination of `knitr::kable()` and `kableExtra::kable_classic()`. Whenever I print a plot below a chunk, I use these. I have not used them in this R Markdown file until now just to keep the code simpler.
 
+```{r}
 
-# Other tasks or functions to add
+data_demographics_age_gender_tidy %>%
+  # calculate M, SD and N for each gender category
+  group_by(gender) %>%
+  summarize(mean_age = mean(age, na.rm = TRUE),
+            mean_age = round_half_up(mean_age, digits = 2),
+            sd_age = mean(age, na.rm = TRUE),
+            sd_age = round_half_up(sd_age, digits = 2),
+            n = n()) %>%
+  # print nicer table
+  kable(allign = "r") %>%
+  kable_classic(full_width = FALSE)
 
-## Finding and removing duplicate, incomplete, or excess data
+```
 
+# Writing data to disk
 
+\TODO add 
+
+# Comment and Knit early, comment and knit often
+
+\TODO add note
 
 # Session info
+
+You can help make your code and results more reproducible by including a `sessionInfo()` call at the end of your scripts. This prints details of your operating system, R version, and packages that were used in your script. When you click knit to create a 
 
 ```{r}
 
