@@ -10,6 +10,7 @@ CC-0 1.0. Public domain: You may use or modify these materials for any purpose.
 
 ## TODO
 
+- add something about YAML headers somewhere
 - add github intro materials from elsewhere
 - make pdfs of slides when finished
 - check if joins exercises are sufficient
