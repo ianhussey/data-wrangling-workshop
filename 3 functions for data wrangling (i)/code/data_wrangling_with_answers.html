@@ -1886,7 +1886,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">Practicing data wrangling</h1>
 <h4 class="author">Template: Ian Hussey; content: [Student name]</h4>
-<h4 class="date">30 October, 2024</h4>
+<h4 class="date">31 October, 2024</h4>
 
 </div>
 
@@ -2671,10 +2671,10 @@ each (sub)group. For example</p>
 <span id="cb103-18"><a href="#cb103-18" tabindex="-1"></a><span class="co">#                             gender == &quot;man&quot; ~ &quot;male&quot;))</span></span>
 <span id="cb103-19"><a href="#cb103-19" tabindex="-1"></a><span class="co"># </span></span>
 <span id="cb103-20"><a href="#cb103-20" tabindex="-1"></a><span class="co"># dir.create(&quot;../data/processed&quot;)</span></span>
-<span id="cb103-21"><a href="#cb103-21" tabindex="-1"></a><span class="co"># write_csv(data_demographics_age_gender_tidy, &quot;data_demographics_age_gender_tidy.csv&quot;)</span></span>
+<span id="cb103-21"><a href="#cb103-21" tabindex="-1"></a><span class="co"># write_csv(data_demographics_age_gender_tidy, &quot;../data/processed/data_demographics_age_gender_tidy.csv&quot;)</span></span>
 <span id="cb103-22"><a href="#cb103-22" tabindex="-1"></a></span>
 <span id="cb103-23"><a href="#cb103-23" tabindex="-1"></a><span class="co"># load suitable example data from disk</span></span>
-<span id="cb103-24"><a href="#cb103-24" tabindex="-1"></a>data_demographics_age_gender_tidy <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data_demographics_age_gender_tidy.csv&quot;</span>)</span>
+<span id="cb103-24"><a href="#cb103-24" tabindex="-1"></a>data_demographics_age_gender_tidy <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;../data/processed/data_demographics_age_gender_tidy.csv&quot;</span>)</span>
 <span id="cb103-25"><a href="#cb103-25" tabindex="-1"></a></span>
 <span id="cb103-26"><a href="#cb103-26" tabindex="-1"></a></span>
 <span id="cb103-27"><a href="#cb103-27" tabindex="-1"></a><span class="co"># illustrate use of group_by() and summarize()</span></span>
@@ -2760,22 +2760,23 @@ possible, just know that it can be done. For example:</p>
 <h2>Practice using <code>summarize()</code></h2>
 <p>Calculate the min, max, mean, and SD of all responses on the self
 report data.</p>
+<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" tabindex="-1"></a><span class="co"># data_selfreport_tidy</span></span></code></pre></div>
 <p>Currently each participant has up to three responses on the
 self-report scales (three item scale: like, positive, and prefer).
 Create a new dataframe containing each unique_id’s mean score across the
 items. Also calculate how many items each participant has data for, and
 whether they have complete data (i.e., data for three items).</p>
+<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" tabindex="-1"></a><span class="co"># data_selfreport_scored &lt;- data_selfreport_tidy %&gt;%</span></span></code></pre></div>
 <p>Using only participants with complete data, calculate the mean and SD
 of all participant’s mean scores on the self-reports.</p>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" tabindex="-1"></a><span class="co"># data_selfreport_tidy</span></span></code></pre></div>
 <p>Create a new data frame that calculates the proportion of
 prime-congruent trials for each participant on the AMP (i.e., the mean
 of the ‘correct’ column) and their proportion of too-fast trials.</p>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" tabindex="-1"></a><span class="co"># data_amp_scored &lt;- data_amp_tidy %&gt;%</span></span></code></pre></div>
 <p>Add to that data frame a new column called “exclude_amp” and set it
 to “exclude” if more than 10% of a participant’s trials are too-fast
 trials.</p>
 <p>Calculate the proportion of participants who are to be excluded.</p>
-<div class="sourceCode" id="cb118"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" tabindex="-1"></a><span class="co"># data_amp_tidy</span></span></code></pre></div>
 </div>
 </div>
 <div id="check-your-learning-1" class="section level1">
@@ -2787,7 +2788,16 @@ vs. summarize(mean_age = mean(age, na.rm = TRUE))</p>
 </div>
 <div id="joining-data-frames" class="section level1">
 <h1>Joining data frames</h1>
-<p>add</p>
+<p>These three data frames are now one-participant-per-row, i.e., wide
+format data.</p>
+<p>To have a single data set to analyze, we need to combine them into
+one data frame. We can use <code>_join</code> family functions to do
+this, such as <code>full_join()</code>.</p>
+<p>Joins can be tricky - there is also an entire separate lesson on
+them.</p>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" tabindex="-1"></a><span class="co">#data_demographics_age_gender_tidy</span></span>
+<span id="cb120-2"><a href="#cb120-2" tabindex="-1"></a><span class="co">#data_selfreport_scored</span></span>
+<span id="cb120-3"><a href="#cb120-3" tabindex="-1"></a><span class="co">#data_amp_scored</span></span></code></pre></div>
 </div>
 <div id="nicer-tables-using-kable-and-kable_classic" class="section level1">
 <h1>Nicer tables using kable() and kable_classic()</h1>
@@ -2796,17 +2806,17 @@ use the combination of <code>knitr::kable()</code> and
 <code>kableExtra::kable_classic()</code>. Whenever I print a plot below
 a chunk, I use these. I have not used them in this R Markdown file until
 now just to keep the code simpler.</p>
-<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" tabindex="-1"></a>data_demographics_age_gender_tidy <span class="sc">%&gt;%</span></span>
-<span id="cb119-2"><a href="#cb119-2" tabindex="-1"></a>  <span class="co"># calculate M, SD and N for each gender category</span></span>
-<span id="cb119-3"><a href="#cb119-3" tabindex="-1"></a>  <span class="fu">group_by</span>(gender) <span class="sc">%&gt;%</span></span>
-<span id="cb119-4"><a href="#cb119-4" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_age =</span> <span class="fu">mean</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb119-5"><a href="#cb119-5" tabindex="-1"></a>            <span class="at">mean_age =</span> <span class="fu">round_half_up</span>(mean_age, <span class="at">digits =</span> <span class="dv">2</span>),</span>
-<span id="cb119-6"><a href="#cb119-6" tabindex="-1"></a>            <span class="at">sd_age =</span> <span class="fu">mean</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb119-7"><a href="#cb119-7" tabindex="-1"></a>            <span class="at">sd_age =</span> <span class="fu">round_half_up</span>(sd_age, <span class="at">digits =</span> <span class="dv">2</span>),</span>
-<span id="cb119-8"><a href="#cb119-8" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb119-9"><a href="#cb119-9" tabindex="-1"></a>  <span class="co"># print nicer table</span></span>
-<span id="cb119-10"><a href="#cb119-10" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">allign =</span> <span class="st">&quot;r&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb119-11"><a href="#cb119-11" tabindex="-1"></a>  <span class="fu">kable_classic</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb121"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb121-1"><a href="#cb121-1" tabindex="-1"></a>data_demographics_age_gender_tidy <span class="sc">%&gt;%</span></span>
+<span id="cb121-2"><a href="#cb121-2" tabindex="-1"></a>  <span class="co"># calculate M, SD and N for each gender category</span></span>
+<span id="cb121-3"><a href="#cb121-3" tabindex="-1"></a>  <span class="fu">group_by</span>(gender) <span class="sc">%&gt;%</span></span>
+<span id="cb121-4"><a href="#cb121-4" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_age =</span> <span class="fu">mean</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb121-5"><a href="#cb121-5" tabindex="-1"></a>            <span class="at">mean_age =</span> <span class="fu">round_half_up</span>(mean_age, <span class="at">digits =</span> <span class="dv">2</span>),</span>
+<span id="cb121-6"><a href="#cb121-6" tabindex="-1"></a>            <span class="at">sd_age =</span> <span class="fu">mean</span>(age, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb121-7"><a href="#cb121-7" tabindex="-1"></a>            <span class="at">sd_age =</span> <span class="fu">round_half_up</span>(sd_age, <span class="at">digits =</span> <span class="dv">2</span>),</span>
+<span id="cb121-8"><a href="#cb121-8" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb121-9"><a href="#cb121-9" tabindex="-1"></a>  <span class="co"># print nicer table</span></span>
+<span id="cb121-10"><a href="#cb121-10" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">allign =</span> <span class="st">&quot;r&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb121-11"><a href="#cb121-11" tabindex="-1"></a>  <span class="fu">kable_classic</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <table class=" lightable-classic" style="font-family: &quot;Arial Narrow&quot;, &quot;Source Sans Pro&quot;, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -2898,7 +2908,7 @@ NA
 including a <code>sessionInfo()</code> call at the end of your scripts.
 This prints details of your operating system, R version, and packages
 that were used in your script. When you click knit to create a</p>
-<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div>
 <pre><code>## R version 4.3.3 (2024-02-29)
 ## Platform: aarch64-apple-darwin20 (64-bit)
 ## Running under: macOS Sonoma 14.5

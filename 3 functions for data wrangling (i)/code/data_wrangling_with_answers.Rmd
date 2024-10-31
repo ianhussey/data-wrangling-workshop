@@ -660,10 +660,10 @@ Often, we don't want to reduce a data frame down to a single row / summarize the
 #                             gender == "man" ~ "male"))
 # 
 # dir.create("../data/processed")
-# write_csv(data_demographics_age_gender_tidy, "data_demographics_age_gender_tidy.csv")
+# write_csv(data_demographics_age_gender_tidy, "../data/processed/data_demographics_age_gender_tidy.csv")
 
 # load suitable example data from disk
-data_demographics_age_gender_tidy <- read_csv("data_demographics_age_gender_tidy.csv")
+data_demographics_age_gender_tidy <- read_csv("../data/processed/data_demographics_age_gender_tidy.csv")
 
 
 # illustrate use of group_by() and summarize()
@@ -732,25 +732,49 @@ mtcars %>%
 
 Calculate the min, max, mean, and SD of all responses on the self report data.
 
-Currently each participant has up to three responses on the self-report scales (three item scale: like, positive, and prefer). Create a new dataframe containing each unique_id's mean score across the items. Also calculate how many items each participant has data for, and whether they have complete data (i.e., data for three items).
-
-Using only participants with complete data, calculate the mean and SD of all participant's mean scores on the self-reports.
-
 ```{r}
 
 # data_selfreport_tidy
 
 ```
 
+Currently each participant has up to three responses on the self-report scales (three item scale: like, positive, and prefer). Create a new dataframe containing each unique_id's mean score across the items. Also calculate how many items each participant has data for, and whether they have complete data (i.e., data for three items).
+
+```{r}
+
+# data_selfreport_scored <- data_selfreport_tidy %>%
+
+```
+
+Using only participants with complete data, calculate the mean and SD of all participant's mean scores on the self-reports.
+
+```{r}
+
+
+
+```
+
 Create a new data frame that calculates the proportion of prime-congruent trials for each participant on the AMP (i.e., the mean of the 'correct' column) and their proportion of too-fast trials.
 
+```{r}
+
+# data_amp_scored <- data_amp_tidy %>%
+
+```
+
 Add to that data frame a new column called "exclude_amp" and set it to "exclude" if more than 10% of a participant's trials are too-fast trials.
+
+```{r}
+
+
+
+```
 
 Calculate the proportion of participants who are to be excluded.
 
 ```{r}
 
-# data_amp_tidy
+
 
 ```
 
@@ -760,7 +784,23 @@ What is the difference between `mutate()` and `summarize()`? If I use the wrong 
 
 # Joining data frames
 
-\TODO add 
+These three data frames are now one-participant-per-row, i.e., wide format data.
+
+To have a single data set to analyze, we need to combine them into one data frame. We can use `_join` family functions to do this, such as `full_join()`.
+
+Joins can be tricky - there is also an entire separate lesson on them.
+
+```{r}
+
+#data_demographics_age_gender_tidy
+#data_selfreport_scored
+#data_amp_scored
+
+data_processed <- data_demographics_age_gender_tidy %>%
+  full_join(data_selfreport_scored, by = "unique_id") %>%
+  full_join(data_amp_scored, by = "unique_id")
+
+```
 
 # Nicer tables using kable() and kable_classic()
 
@@ -784,7 +824,11 @@ data_demographics_age_gender_tidy %>%
 
 # Writing data to disk
 
-\TODO add 
+```{r}
+
+write_csv(data_processed, "../data/processed/data_processed.csv")
+
+```
 
 # Comment and Knit early, comment and knit often
 
