@@ -10,6 +10,5 @@ CC-0 1.0. Public domain: You may use or modify these materials for any purpose.
 
 ## TODO
 
-- data_wrangling_with_answers.Rmd needs summarize and other things added
-- data_wrangling_without_answers.Rmd needs to be created after former is finished.
 - joins exercise needs to be improved 
+- add master exclude variable to wrangling

@@ -209,14 +209,9 @@ data_demographics_renamed <- data_demographics_clean_names %>%
   rename(unique_id = subject,
          item = trialcode) 
 
-data_selfreport_renamed <- data_selfreport_clean_names %>%
-  rename(unique_id = subject,
-         item = trialcode)
+# data_selfreport_renamed <- data_selfreport_clean_names %>%
 
-data_amp_renamed <- data_amp_clean_names %>%
-  rename(unique_id = subject,
-         block = blockcode,
-         trial_type = trialcode)
+# data_amp_renamed <- data_amp_clean_names %>%
 
 ```
 
@@ -231,11 +226,9 @@ Select the self reports and AMP data too.
 data_demographics_selected_columns <- data_demographics_renamed %>%
   select(unique_id, item, response)
 
-data_selfreport_selected_columns <- data_selfreport_renamed %>%
-  select(unique_id, item, response)
+#data_selfreport_selected_columns <- data_selfreport_renamed %>%
 
-data_amp_selected_columns <- data_amp_renamed %>%
-  select(unique_id, block, trial_type, correct, latency)
+#data_amp_selected_columns <- data_amp_renamed %>%
 
 ```
 
@@ -260,19 +253,9 @@ data_demographics_trimmed <- read_csv("../data/raw/data_demographics_raw.csv") %
   select(unique_id, item, response)
 
 
-data_selfreport_trimmed <- read_csv("../data/raw/data_selfreport_raw.csv") %>%
-  clean_names() %>%
-  rename(unique_id = subject,
-         item = trialcode) %>%
-  select(unique_id, item, response)
+# data_selfreport_trimmed <- read_csv("../data/raw/data_selfreport_raw.csv") %>%
 
-
-data_amp_trimmed <- read_csv("../data/raw/data_amp_raw.csv") %>%
-  clean_names() %>%
-  rename(unique_id = subject,
-         block = blockcode,
-         trial_type = trialcode) %>%
-  select(unique_id, block, trial_type, correct, latency)
+# data_amp_trimmed <- read_csv("../data/raw/data_amp_raw.csv") %>%
 
 ```
 
@@ -384,12 +367,9 @@ Filter the self reports data frame to remove the instructions. Filter the AMP da
 
 ```{r}
 
-data_selfreport_trials <- data_selfreport_trimmed %>%
-  filter(item %in% c("positive", "prefer", "like"))
+# data_selfreport_trials <- data_selfreport_trimmed %>%
 
-data_amp_test_trials <- data_amp_trimmed %>%
-  filter(block == "test" & trial_type != "instructions")
-
+# data_amp_test_trials <- data_amp_trimmed %>%
 ```
 
 # Check your learning
@@ -493,8 +473,7 @@ Try doing this with a simple logical test of whether latency < 100. You can do t
 
 ```{r}
 
-data_amp_test_trials_with_fast_trials <- data_amp_test_trials %>%
-  mutate(fast_trial = latency < 100)
+# data_amp_test_trials_with_fast_trials <- data_amp_test_trials %>%
 
 ```
 
@@ -513,16 +492,14 @@ data_demographics_trimmed %>%
   filter(item == "age") %>%
   count(response) 
 
-# fix them with mutate
-data_demographics_age_tidy <- data_demographics_trimmed %>%
-  filter(item == "age") %>%
-  mutate(response = ifelse(response == "old", NA, response),
-         response = as.numeric(response)) %>%
-  select(unique_id, age = response) # note that you can rename inside a select call
+# # fix them with mutate
+# data_demographics_age_tidy <- data_demographics_trimmed %>%
+#   filter(item == "age") %>%
+#   mutate() 
 
-# check this has fixed the issue
-data_demographics_age_tidy %>%
-  count(age)
+# # check this has fixed the issue
+# data_demographics_age_tidy %>%
+#   count(age)
 
 ```
 
@@ -545,16 +522,15 @@ data_selfreport_trials %>%
 # what type of data is the response column?
 class(data_selfreport_trials$response)
 
-# remove non Likert values
-data_selfreport_tidy <- data_selfreport_trials %>%
-  mutate(response = ifelse(response %in% c("1", "2", "3", "4", "5", "6", "7"), response, NA),
-         response = as.numeric(response))
-
-# show the data after changes
-data_selfreport_tidy %>%
-  count(response)
-
-class(data_selfreport_tidy$response)
+# # remove non Likert values
+# data_selfreport_tidy <- data_selfreport_trials %>%
+#   mutate()
+#
+# # show the data after changes
+# data_selfreport_tidy %>%
+#   count(response)
+# 
+# class(data_selfreport_tidy$response)
 
 ```
 
@@ -574,6 +550,7 @@ The AMP data needs to be reverse scored. Just like an item on a self-report that
 
 ```{r}
 
+# in your own time later, see if you can rewrite this yourself without looking at the answer to practice using case_when
 data_amp_tidy <- data_amp_test_trials_with_fast_trials %>%
   mutate(correct = case_when(trial_type == "prime_positive" ~ correct,
                              trial_type == "prime_negative" & correct == 0 ~ 1,
@@ -742,22 +719,13 @@ Calculate the min, max, mean, and SD of all responses on the self report data.
 
 # data_selfreport_tidy
 
-data_selfreport_tidy %>%
-  summarize(min_response = min(response, na.rm = TRUE),
-            max_response = max(response, na.rm = TRUE),
-            mean_response = mean(response, na.rm = TRUE),
-            sd_response = sd(response, na.rm = TRUE))
-
 ```
 
 Currently each participant has up to three responses on the self-report scales (three item scale: like, positive, and prefer). Create a new dataframe containing each unique_id's mean score across the items. Also calculate how many items each participant has data for, and whether they have complete data (i.e., data for three items).
 
 ```{r}
 
-data_selfreport_scored <- data_selfreport_tidy %>%
-  group_by(unique_id) %>%
-  summarize(mean_self_report = mean(response),
-            n_items = n())
+# data_selfreport_scored <- data_selfreport_tidy %>%
 
 ```
 
@@ -765,10 +733,7 @@ Using only participants with complete, calculate the mean and SD of all particip
 
 ```{r}
 
-data_selfreport_scored %>%
-  filter(n_items == 3) %>%
-  summarize(mean_mean_self_report = mean(mean_self_report, na.rm = TRUE),
-            sd_mean_self_report = sd(mean_self_report, na.rm = TRUE))
+# data_selfreport_scored %>%
 
 ```
 
@@ -778,12 +743,7 @@ Also add to that data frame a new column called "exclude_amp" and set it to "exc
 
 ```{r}
 
-data_amp_scored <- data_amp_tidy %>%
-  group_by(unique_id) %>%
-  summarize(amp_score = mean(correct, na.rm = TRUE),
-            proportion_too_fast_trials = mean(fast_trial, na.rm = TRUE),
-            n_trials = n()) %>%
-  mutate(exclude_amp = ifelse(proportion_too_fast_trials > .10, "exclude", "include"))
+# data_amp_scored <- data_amp_tidy %>%
 
 ```
 
@@ -791,8 +751,7 @@ Calculate the proportion of participants who are to be excluded.
 
 ```{r}
 
-data_amp_scored %>%
-  summarize(proportion_to_be_excluded = mean(exclude_amp == "exclude"))
+# data_amp_scored %>%
 
 ```
 
@@ -810,9 +769,9 @@ Joins can be tricky - there is also an entire separate lesson on them.
 
 ```{r}
 
-data_processed <- data_demographics_age_gender_tidy %>%
-  full_join(data_selfreport_scored, by = "unique_id") %>%
-  full_join(data_amp_scored, by = "unique_id")
+#data_demographics_age_gender_tidy
+#data_selfreport_scored
+#data_amp_scored
 
 ```
 
